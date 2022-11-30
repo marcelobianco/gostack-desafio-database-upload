@@ -4,7 +4,7 @@ import Transaction from '../models/Transaction';
 import { getCustomRepository, getRepository } from 'typeorm';
 
 
-// import AppError from '../errors/AppError';
+import AppError from '../errors/AppError';
 
 interface Request {
   title: string;
@@ -18,6 +18,13 @@ class CreateTransactionService {
     const transactionRepository = getCustomRepository(TransactionsRepository);
 
     const categoryRepository = getRepository(Category);
+
+    const { total } = await transactionRepository.getBalance();
+
+    if (type === 'outcome' && total < value) {
+      throw new AppError('Voce não tem balance');
+    }
+
     let checkCategoryExists = await categoryRepository.findOne({
       where: { title: category },
     });
